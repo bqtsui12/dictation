@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 from transformers import pipeline
+from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, WebRtcMode
 
 # Cache the Whisper model loading
 @st.cache_resource
