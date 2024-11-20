@@ -1,4 +1,6 @@
-streamlit==1.25.0
-transformers==4.33.0
-torch==2.5.1
-streamlit-webrtc==0.45.0
+pip
+transformers==4.46.3
+torch==2.5.1+cu121
+torchaudio==2.5.1+cu121
+torchvision==0.20.1+cu121
+streamlit-webrtc==0.47.9
