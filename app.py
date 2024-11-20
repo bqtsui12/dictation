@@ -14,6 +14,14 @@ def load_whisper_model():
 def load_llm_model():
     return pipeline(model="Qwen/Qwen2.5-1.5B-Instruct", device_map='auto')
 
+class AudioProcessor(AudioProcessorBase):
+    def __init__(self):
+        self.audio_data = b""
+    
+    def recv(self, frame):
+        self.audio_data += frame.to_ndarray().tobytes()
+        return frame
+
 # Function to process audio and generate a report
 def process_audio(filepath):
     if filepath is None:
