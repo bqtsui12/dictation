@@ -14,6 +14,7 @@ def load_whisper_model():
 def load_llm_model():
     return pipeline(model="Qwen/Qwen2.5-1.5B-Instruct", device_map='auto')
 
+# Define an audio processor class for capturing and processing microphone input
 class AudioProcessor(AudioProcessorBase):
     def __init__(self):
         self.audio_data = b""
@@ -22,19 +23,18 @@ class AudioProcessor(AudioProcessorBase):
         self.audio_data += frame.to_ndarray().tobytes()
         return frame
 
-# Function to process audio and generate a report
-def process_audio(filepath):
-    if filepath is None:
-        return "No audio file provided. Please upload an audio file or record from the microphone."
-    if not os.path.exists(filepath):
-        return f"File not found: {filepath}"
-
+def process_audio(audio_data):
     try:
+        # Save captured audio data to a temporary file
+        temp_audio_path = "temp_audio.wav"
+        with open(temp_audio_path, "wb") as f:
+            f.write(audio_data)
+
         # Load cached Whisper model
         pipe = load_whisper_model()
 
         # Transcribe the audio using Whisper model
-        output = pipe(filepath, max_new_tokens=256, chunk_length_s=30, batch_size=8)
+        output = pipe(temp_audio_path)
         transcription = output["text"]
 
         # Load cached LLM model
@@ -68,7 +68,7 @@ def process_audio(filepath):
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
-# Streamlit UI
+# Streamlit UI for capturing audio from microphone and generating reports
 st.title("Radiology Report Generator")
 
 # WebRTC streamer for capturing audio from microphone
@@ -92,4 +92,3 @@ if webrtc_ctx.audio_receiver:
         st.write(report)
 else:
     st.warning("Please enable your microphone to start dictating.")
-
