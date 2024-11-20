@@ -59,20 +59,28 @@ def process_audio(filepath):
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
-# Streamlit UI for uploading audio and generating reports
+# Streamlit UI
 st.title("Radiology Report Generator")
 
-# Upload or record audio from microphone
-audio_file = st.file_uploader("Upload an audio file", type=["wav", "mp3"])
+# WebRTC streamer for capturing audio from microphone
+webrtc_ctx = webrtc_streamer(
+    key="speech-to-text",
+    mode=WebRtcMode.SENDRECV,
+    audio_processor_factory=AudioProcessor,
+    media_stream_constraints={"audio": True, "video": False},
+)
 
-if audio_file is not None:
-    # Save uploaded file temporarily
-    with open("temp_audio.wav", "wb") as f:
-        f.write(audio_file.getbuffer())
-    
-    # Process audio and display report
-    st.write("Processing audio...")
-    report = process_audio("temp_audio.wav")
-    
-    st.subheader("Generated Radiology Report:")
-    st.write(report)
+if webrtc_ctx.audio_receiver:
+    # Get audio data from microphone input
+    audio_processor = webrtc_ctx.audio_processor
+    if audio_processor and len(audio_processor.audio_data) > 0:
+        st.write("Processing audio...")
+        
+        # Process and generate radiology report from captured audio data
+        report = process_audio(audio_processor.audio_data)
+        
+        st.subheader("Generated Radiology Report:")
+        st.write(report)
+else:
+    st.warning("Please enable your microphone to start dictating.")
+
